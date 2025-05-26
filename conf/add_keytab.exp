@@ -1,0 +1,49 @@
+#!/usr/bin/expect -f 
+
+set user [lrange $argv 0 0] 
+
+spawn kinit admin/admin
+
+#First get inside of kinit
+expect {
+	"admin/admin@HADOOP.COM" {
+		send "123456\r"
+	}
+}
+set result [wait result]
+
+set ret [lindex $result 3]
+#puts $ret
+if {$ret > 0} {
+   puts stdout "kinit error\n"
+   exit 1
+}
+
+spawn kadmin
+
+#First get inside of kinit
+expect {
+	"admin/admin@HADOOP.COM" {
+		send "123456\r"
+	}
+}
+#second generate keytab file
+expect {
+	"kadmin:" {
+		send "addprinc -randkey $user\r"
+	}
+}
+
+
+expect {
+        "kadmin:" {
+                send "xst -k /tmp/.$user.keytab $user\r"
+        }
+}
+
+expect {
+        "kadmin:" {
+                send "quit\r"
+        }
+}
+

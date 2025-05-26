@@ -1,0 +1,38 @@
+#!/usr/bin/expect -f 
+
+set user [lrange $argv 0 0] 
+
+spawn kinit admin/admin
+
+#First get inside of kinit
+expect {
+	"admin/admin@HADOOP.COM" {
+		send "123456\r"
+	}
+}
+
+spawn kadmin
+
+#First get inside of kinit
+expect {
+	"admin/admin@HADOOP.COM" {
+		send "123456\r"
+	}
+}
+#second delete keytab
+expect {
+	"kadmin:" {
+		send "delprinc $user\r"
+	}
+}
+expect "Are you sure you want to delete the principal \"$user@HADOOP.COM\"? (yes/no):"
+send "yes\r"
+
+
+#final exit kadmin
+expect {
+        "kadmin:" {
+                send "quit\r"
+        }
+}
+
